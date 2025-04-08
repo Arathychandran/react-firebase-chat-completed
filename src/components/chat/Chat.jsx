@@ -9,17 +9,34 @@ import { format } from "timeago.js";
 
 const Chat = () => {
   const [islWorker, setIslWorker] = useState(null);
-  
+  const [text, setText] = useState("");
+  const [img, setImg] = useState({ file: null, url: "" });
+  const [open, setOpen] = useState(false);
+  const [isProcessingISL, setIsProcessingISL] = useState(false);
+
+  const endRef = useRef();
+
+  const { chat, user } = useChatStore();
+  const { currentUser, isCurrentUserBlocked, isReceiverBlocked } = useUserStore();
+
+  const chatId = chat?.chat_id;
+
   useEffect(() => {
     const worker = new Worker(new URL('../../workers/islWorker.js', import.meta.url));
     setIslWorker(worker);
-    
+
     return () => worker.terminate();
   }, []);
 
   const convertToISL = async (text) => {
     return new Promise((resolve) => {
-      islWorker.onmessage = (e) => resolve(e.data);
+      if (!islWorker) return resolve({ videoUrl: null, emotion: null });
+
+      setIsProcessingISL(true);
+      islWorker.onmessage = (e) => {
+        setIsProcessingISL(false);
+        resolve(e.data);
+      };
       islWorker.postMessage({ text });
     });
   };
@@ -38,62 +55,62 @@ const Chat = () => {
     }
   };
 
-const handleSend = async () => {
-  if (text.trim() === "" || isProcessingISL) return;
+  const handleSend = async () => {
+    if (text.trim() === "" || isProcessingISL) return;
 
-  let imgUrl = null;
-  let islResult = { videoUrl: null, emotion: null };
+    let imgUrl = null;
+    let islResult = { videoUrl: null, emotion: null };
 
-  try {
-    // Upload image if present
-    if (img.file) {
-      imgUrl = await upload(img.file);
+    try {
+      if (img.file) {
+        imgUrl = await upload(img.file);
+      }
+
+      if (text.trim()) {
+        islResult = await convertToISL(text);
+      }
+
+      const newMessage = {
+        chat_id: chatId,
+        sender_id: currentUser.id,
+        text,
+        img: imgUrl,
+        isl_video: islResult.videoUrl,
+        emotion: islResult.emotion,
+        created_at: new Date().toISOString(),
+      };
+
+      await supabase.from("messages").insert([newMessage]);
+
+      await Promise.all([
+        supabase
+          .from("user_chats")
+          .update({
+            last_message: text,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("user_id", user.id)
+          .eq("chat_id", chatId),
+        supabase
+          .from("user_chats")
+          .update({
+            last_message: text,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("user_id", currentUser.id)
+          .eq("chat_id", chatId),
+      ]);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setImg({ file: null, url: "" });
+      setText("");
     }
-    
-    // Convert text to ISL if not empty
-    if (text.trim()) {
-      islResult = await convertToISL(text);
-    }
+  };
 
-    const newMessage = {
-      chat_id: chatId,
-      sender_id: currentUser.id,
-      text,
-      img: imgUrl,
-      isl_video: islResult.videoUrl,
-      emotion: islResult.emotion,
-      created_at: new Date().toISOString(),
-    };
-
-    // Insert into messages table
-    await supabase.from("messages").insert([newMessage]);
-
-    // Update last message for both users
-    await Promise.all([
-      supabase
-        .from("user_chats")
-        .update({ 
-          last_message: text, 
-          updated_at: new Date().toISOString() 
-        })
-        .eq("user_id", user.id)
-        .eq("chat_id", chatId),
-      supabase
-        .from("user_chats")
-        .update({ 
-          last_message: text, 
-          updated_at: new Date().toISOString() 
-        })
-        .eq("user_id", currentUser.id)
-        .eq("chat_id", chatId),
-    ]);
-  } catch (err) {
-    console.error(err);
-  } finally {
-    setImg({ file: null, url: "" });
-    setText("");
-  }
-};
+  useEffect(() => {
+    endRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [chat?.messages]);
 
   return (
     <div className="chat">
@@ -127,13 +144,13 @@ const handleSend = async () => {
                 <div className="emotion-tag">Emotion: {message.emotion}</div>
               )}
               {message.isl_video && (
-  <div className="isl-video">
-    <video controls width="240">
-      <source src={message.isl_video} type="video/mp4" />
-      Your browser does not support the video tag.
-    </video>
-  </div>
-)}
+                <div className="isl-video">
+                  <video controls width="240">
+                    <source src={message.isl_video} type="video/mp4" />
+                    Your browser does not support the video tag.
+                  </video>
+                </div>
+              )}
               <span>{format(message.created_at)}</span>
             </div>
           </div>
@@ -146,13 +163,13 @@ const handleSend = async () => {
             </div>
           </div>
         )}
-        
+
         {isProcessingISL && (
           <div className="processing-indicator">
             Converting text to Indian Sign Language...
           </div>
         )}
-        
+
         <div ref={endRef}></div>
       </div>
 
@@ -169,11 +186,11 @@ const handleSend = async () => {
         <input
           type="text"
           placeholder={
-            isCurrentUserBlocked || isReceiverBlocked 
-              ? "You cannot send a message" 
+            isCurrentUserBlocked || isReceiverBlocked
+              ? "You cannot send a message"
               : isProcessingISL
-                ? "Converting to ISL..." 
-                : "Type a message..."
+              ? "Converting to ISL..."
+              : "Type a message..."
           }
           value={text}
           onChange={(e) => setText(e.target.value)}
@@ -189,10 +206,15 @@ const handleSend = async () => {
           )}
         </div>
 
-        <button 
-          className="sendButton" 
-          onClick={handleSend} 
-          disabled={isCurrentUserBlocked || isReceiverBlocked || isProcessingISL || !text.trim()}
+        <button
+          className="sendButton"
+          onClick={handleSend}
+          disabled={
+            isCurrentUserBlocked ||
+            isReceiverBlocked ||
+            isProcessingISL ||
+            !text.trim()
+          }
         >
           Send
         </button>
