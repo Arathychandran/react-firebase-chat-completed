@@ -168,4 +168,31 @@
       }
     }
   }
+  /* Add these styles to your existing chat.css file */
+/* Add to your chat.css */
+.isl-video {
+  margin-top: 10px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.isl-video video {
+  max-width: 100%;
+  border-radius: 8px;
+}
+
+.emotion-tag {
+  font-size: 0.8rem;
+  color: #666;
+  margin-top: 5px;
+}
+
+.processing-indicator {
+  padding: 10px;
+  background: #f0f0f0;
+  border-radius: 8px;
+  margin: 10px 0;
+  text-align: center;
+  color: #666;
+}
 }

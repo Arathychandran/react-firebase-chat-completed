@@ -122,7 +122,8 @@
 // export default ChatList;
 
 
-import { useEffect, useState } from "react";
+
+import { useEffect, useState } from "react"; 
 import "./chatList.css";
 import AddUser from "./addUser/addUser";
 import { useUserStore } from "../../../lib/userStore";
@@ -137,38 +138,38 @@ const ChatList = () => {
   const { currentUser } = useUserStore();
   const { chatId, changeChat } = useChatStore();
 
+  const fetchChats = async () => {
+    const { data: chatItems, error } = await supabase
+      .from("user_chats")
+      .select("*")
+      .eq("user_id", currentUser.id);
+
+    if (error) {
+      console.error(error);
+      return;
+    }
+
+    const chatData = await Promise.all(
+      chatItems.map(async (item) => {
+        const { data: user, error: userError } = await supabase
+          .from("users")
+          .select("username, avatar, blocked")
+          .eq("id", item.receiver_id)
+          .single();
+
+        if (userError) {
+          console.error(userError);
+          return item;
+        }
+
+        return { ...item, user };
+      })
+    );
+
+    setChats(chatData.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at)));
+  };
+
   useEffect(() => {
-    const fetchChats = async () => {
-      const { data: chatItems, error } = await supabase
-        .from("user_chats")
-        .select("*")
-        .eq("user_id", currentUser.id);
-
-      if (error) {
-        console.error(error);
-        return;
-      }
-
-      const chatData = await Promise.all(
-        chatItems.map(async (item) => {
-          const { data: user, error: userError } = await supabase
-            .from("users")
-            .select("username, avatar, blocked")
-            .eq("id", item.receiver_id)
-            .single();
-
-          if (userError) {
-            console.error(userError);
-            return item;
-          }
-
-          return { ...item, user };
-        })
-      );
-
-      setChats(chatData.sort((a, b) => b.updated_at - a.updated_at));
-    };
-
     fetchChats();
   }, [currentUser.id]);
 
@@ -182,30 +183,32 @@ const ChatList = () => {
       (item) => item.chat_id === chat.chat_id
     );
 
-    updatedChats[chatIndex].is_seen = true;
+    if (chatIndex !== -1) {
+      updatedChats[chatIndex].is_seen = true;
 
-    try {
-      await supabase
-        .from("user_chats")
-        .update({ is_seen: true })
-        .eq("chat_id", chat.chat_id)
-        .eq("user_id", currentUser.id);
+      try {
+        await supabase
+          .from("user_chats")
+          .update({ is_seen: true })
+          .eq("chat_id", chat.chat_id)
+          .eq("user_id", currentUser.id);
 
-      changeChat(chat.chat_id, chat.user);
-    } catch (err) {
-      console.log(err);
+        changeChat(chat.chat_id, chat.user);
+      } catch (err) {
+        console.log(err);
+      }
     }
   };
 
   const filteredChats = chats.filter((c) =>
-    c.user.username.toLowerCase().includes(input.toLowerCase())
+    c.user?.username?.toLowerCase().includes(input.toLowerCase())
   );
 
   return (
     <div className="chatList">
       <div className="search">
         <div className="searchBar">
-          <img src="./search.png" alt="" />
+          <img src="/search.png" alt="Search" />
           <input
             type="text"
             placeholder="Search"
@@ -213,12 +216,13 @@ const ChatList = () => {
           />
         </div>
         <img
-          src={addMode ? "./minus.png" : "./plus.png"}
-          alt=""
+          src={addMode ? "/minus.png" : "/plus.png"}
+          alt="Add Chat"
           className="add"
           onClick={() => setAddMode((prev) => !prev)}
         />
       </div>
+
       {filteredChats.map((chat) => (
         <div
           className="item"
@@ -228,17 +232,17 @@ const ChatList = () => {
         >
           <img
             src={
-              chat.user.blocked.includes(currentUser.id)
-                ? "./avatar.png"
-                : chat.user.avatar || "./avatar.png"
+              chat.user?.blocked?.includes(currentUser.id)
+                ? "/avatar.png"
+                : chat.user?.avatar || "/avatar.png"
             }
-            alt=""
+            alt="User Avatar"
           />
           <div className="texts">
             <span>
-              {chat.user.blocked.includes(currentUser.id)
+              {chat.user?.blocked?.includes(currentUser.id)
                 ? "User"
-                : chat.user.username}
+                : chat.user?.username}
             </span>
             <p>{chat.last_message}</p>
           </div>
@@ -246,7 +250,6 @@ const ChatList = () => {
       ))}
 
       {addMode && <AddUser refreshChats={fetchChats} />}
-
     </div>
   );
 };
