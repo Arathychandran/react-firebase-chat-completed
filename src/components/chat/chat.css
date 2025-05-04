@@ -195,4 +195,32 @@
   text-align: center;
   color: #666;
 }
+
+.button-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-left: 10px;
+}
+
+.convertButton {
+  padding: 8px 12px;
+  border: none;
+  background-color: #7e57c2;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.convertButton:hover {
+  background-color: #673ab7;
+}
+
+.convertButton:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
 }
