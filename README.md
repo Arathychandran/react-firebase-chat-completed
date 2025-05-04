@@ -13,7 +13,7 @@ A comprehensive application for bridging communication gaps between sign languag
 
 ## Watch Demo
 
-![Demo](C:\Users\aswat\Desktop\react-firebase-chat-completed\sign.mp4)
+![Demo](https://drive.google.com/drive/folders/1amhOlidMMWZyP5l8Gzfu4N2BzGGSREqs?usp=sharing)
 
 ## Prerequisites
 
