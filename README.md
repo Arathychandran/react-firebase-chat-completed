@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-
 # SignAssist
-
-=======
 
 # Sign Language Translator Application
 
@@ -70,8 +66,7 @@ REACT-FIREBASE-CHAT-C...          #The Chat Interface
 ├── models/
 ├── node_modules/
 ├── public/
-├── src/
-├── ...
+
 ├── signassist/                   #The Conversion Part
 │   ├── __pycache__/
 │   ├── models/
@@ -90,9 +85,9 @@ REACT-FIREBASE-CHAT-C...          #The Chat Interface
 │   ├── text_processor.py
 │   ├── tfidf_vectorizer.pkl
 │   ├── train.py
+
 ├── src/
 ├── vedios - Copy*/
-│
 ├── .eslintrc.cjs
 ├── .gitignore
 ├── emotion_model_svm.pkl
@@ -107,15 +102,6 @@ REACT-FIREBASE-CHAT-C...          #The Chat Interface
 ├── text_history.pkl
 ├── tfidf_vectorizer.pkl
 ├── vite.config.js
-│
-└── sign_language_app/
-├── models/
-├── data/
-├── static/
-├── templates/
-├── app.py
-├── text_processor.py
-├── sign_language_processor.py
 └── requirements.txt
 
 ```
@@ -134,4 +120,3 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 - This application uses pre-trained models for sign language recognition and emotion detection
 - Special thanks to the MediaPipe team for their hand tracking implementation
-  > > > > > > > 79ebef6 (ch)
