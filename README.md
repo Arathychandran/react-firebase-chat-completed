@@ -11,6 +11,10 @@ A comprehensive application for bridging communication gaps between sign languag
 - **Sign Language to Text**: Record sign language videos and convert them to text
 - **Emotion Recognition**: Detect emotions from both text and sign language videos
 
+## Watch Demo
+
+[Watch demo](C:\Users\aswat\Desktop\react-firebase-chat-completed\sign.mp4)
+
 ## Prerequisites
 
 - Python 3.8 or higher
