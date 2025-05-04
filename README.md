@@ -13,7 +13,8 @@ A comprehensive application for bridging communication gaps between sign languag
 
 ## Watch Demo
 
-![Demo](chatinterface.mp4)
+![Chat Interface](chatinterface.mp4)
+![Sign Conversion](sign.mp4)
 
 ## Prerequisites
 
