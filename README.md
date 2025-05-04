@@ -13,7 +13,7 @@ A comprehensive application for bridging communication gaps between sign languag
 
 ## Watch Demo
 
-![Demo](https://drive.google.com/drive/folders/1amhOlidMMWZyP5l8Gzfu4N2BzGGSREqs?usp=sharing)
+![Demo](chatinterface.mp4)
 
 ## Prerequisites
 
