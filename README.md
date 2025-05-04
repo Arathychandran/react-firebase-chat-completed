@@ -61,13 +61,13 @@ A comprehensive application for bridging communication gaps between sign languag
 ## Application Structure
 
 ```
-REACT-FIREBASE-CHAT-C...          #The Chat Interface
+REACT-FIREBASE-CHAT-C...       #The Chat Interface
 │
 ├── models/
 ├── node_modules/
 ├── public/
 
-├── signassist/                   #The Conversion Part
+├── signassistv/                #The Conversion Part - https://github.com/Arathychandran/SignAssist2.git
 │   ├── __pycache__/
 │   ├── models/
 │   ├── static/
